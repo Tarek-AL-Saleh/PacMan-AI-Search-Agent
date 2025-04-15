@@ -511,7 +511,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     while remaining:
         distances = [(util.manhattanDistance(current, food), food) for food in remaining]
         minDist, closestfood = min(distances)
-        totalCost += minDist
+        totalCost + = minDist
         current = closestfood
         remaining.remove(closestfood)
 
