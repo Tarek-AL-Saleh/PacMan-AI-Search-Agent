@@ -84,24 +84,19 @@ def depthFirstSearch(problem: SearchProblem):
     understand the search problem that is being passed in:
     """
     stack=util.Stack()
-    visited=set()
-    visited_path=[]
+    visited=set() # to mark the visited nodes
     stack.push((problem.getStartState(), [], 0))
-    while not stack.isEmpty():
-        state, path, cost = stack.pop()
+    
+    while not stack.isEmpty(): 
+        state, path, cost = stack.pop() # take the position, the path till this node, and the total cost
 
-        if state not in visited:
-            visited.add(state)
+        if state not in visited: #if we didn't check it before
+            visited.add(state) # mark it as checked or visited
 
-            if len(path)!=0:
-                visited_path.append(path[-1])
-
-            if problem.isGoalState(state):
-                print("\nGoal Path:")
-                print(path)
-                return path
-            
-            for successor, action, stepCost in problem.getSuccessors(state):
+            if problem.isGoalState(state): #if it is the goal state, return the goal path
+                return path    
+               
+            for successor, action, stepCost in problem.getSuccessors(state): #add every valid unvisited successor to the stack
                 if successor not in visited:
                     stack.push((successor, path + [action], cost + stepCost))
 
@@ -110,8 +105,8 @@ def depthFirstSearch(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
 
     """Search the shallowest nodes in the search tree first."""
-
-    queue = util.Queue()
+    # same as dfs but use a FIFO Queue instead of a LIFO Stack
+    queue = util.Queue() 
     visited = set()
     queue.push((problem.getStartState(), [], 0))
 
@@ -122,39 +117,33 @@ def breadthFirstSearch(problem: SearchProblem):
             visited.add(state)
 
             if problem.isGoalState(state):
-                print("\nGoal Path:")
-                print(path)
                 return path
             
             for successor, action, stepCost in problem.getSuccessors(state):
                 if successor not in visited:
                     queue.push((successor, path + [action], cost + stepCost))
-
-    return [] # if the goal state is not reachable, then return an empty list 
+    return []
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
 
     frontier = util.PriorityQueue()
-    start_state = problem.getStartState()
     visited = set()
-    frontier.push((start_state, [], 0), 0)
+    frontier.push((problem.getStartState(), [], 0), 0)
 
-    while not frontier.isEmpty():
+    while not frontier.isEmpty(): #pick a node from the priority queue according to the least total cost 
         state, path, cost = frontier.pop()
 
-        if problem.isGoalState(state):
+        if problem.isGoalState(state): # check the goal after choosing the node
             return path
 
         if state not in visited:
             visited.add(state)
             
             for successor, action, step_cost in problem.getSuccessors(state):
-                new_path = path + [action]
                 new_cost = cost + step_cost
-                frontier.push((successor, new_path, new_cost), new_cost) #the priority is according to the total cost to take the action
-
-    return [] # if the goal state is not reachable, then return an empty list 
+                frontier.push((successor, path + [action], new_cost), new_cost) #the priority is according to the total cost to take the action
+    return [] 
 
 def nullHeuristic(state, problem=None):
     """
@@ -168,24 +157,22 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     frontier = util.PriorityQueue()
-    start = problem.getStartState()
-    goal = problem
-    frontier.push((start, [], 0), heuristic(start, goal)) # (((x,y),WEST,1), 4)
     visited = set()
+    frontier.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem)) # the nodes are stored in the PriorityQueue in the shape of: (((PositionX,PositionY),Actions,Total_cost), Heuristic+Total_cost)
 
     while not frontier.isEmpty():
         current_state, actions, current_cost = frontier.pop()
+
         if problem.isGoalState(current_state):
             return actions
         
         if current_state not in visited:
             visited.add(current_state)
+
             for successor, action, step_cost in problem.getSuccessors(current_state):
                 new_cost = current_cost + step_cost
-                new_actions = actions + [action]
-                priority = new_cost + heuristic(successor, problem)
-                frontier.push((successor, new_actions, new_cost), priority)
-
+                priority = new_cost + heuristic(successor, problem) # Priority is found by the sum of the Heuristic and the total cost
+                frontier.push((successor, actions + [action], new_cost), priority)
     return []
 
 
